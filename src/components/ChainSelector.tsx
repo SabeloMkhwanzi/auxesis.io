@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { CHAIN_LOGOS, CHAIN_NAMES } from '@/utils/constants';
+import { formatCurrency, formatPercentage } from '@/utils/portfolioUtils';
 
 interface Chain {
   chainId: number;
@@ -18,49 +20,12 @@ interface ChainSelectorProps {
   totalPortfolioValue: number;
 }
 
-const CHAIN_LOGOS: Record<number, string> = {
-  1: '🔷', // Ethereum
-  10: '🔴', // Optimism
-  56: '🟡', // BSC
-  100: '🟢', // Gnosis
-  137: '🟣', // Polygon
-  324: '⚡', // zkSync
-  8453: '🔵', // Base
-  42161: '🔷', // Arbitrum
-  43114: '🔺', // Avalanche
-  59144: '📏', // Linea
-};
-
-const CHAIN_NAMES: Record<number, string> = {
-  1: 'Ethereum',
-  10: 'Optimism',
-  56: 'BNB Chain',
-  100: 'Gnosis',
-  137: 'Polygon',
-  324: 'zkSync Era',
-  8453: 'Base',
-  42161: 'Arbitrum',
-  43114: 'Avalanche',
-  59144: 'Linea',
-};
-
 export default function ChainSelector({ 
   chains, 
   selectedChainId, 
   onChainSelect, 
-  totalPortfolioValue 
 }: ChainSelectorProps) {
   const [showAllChains, setShowAllChains] = useState(false);
-  
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-    return `$${value.toFixed(2)}`;
-  };
-
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`;
-  };
 
   // Sort chains by total value (descending)
   const sortedChains = [...chains].sort((a, b) => b.totalValue - a.totalValue);
@@ -98,7 +63,14 @@ export default function ChainSelector({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{chainLogo}</span>
+                  <img 
+                    src={chainLogo} 
+                    alt={`${chainName} logo`}
+                    className="w-6 h-6 rounded-full"
+                    onError={(e) => {
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNGM0Y0RjYiLz4KPHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI2IiB5PSI2Ij4KPHBhdGggZD0iTTYgOUM3LjY1Njg1IDkgOSA3LjY1Njg1IDkgNkM5IDQuMzQzMTUgNy42NTY4NSAzIDYgM0M0LjM0MzE1IDMgMyA0LjM0MzE1IDMgNkMzIDcuNjU2ODUgNC4zNDMxNSA5IDYgOVoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+Cjwvc3ZnPgo=';
+                    }}
+                  />
                   <div>
                     <h4 className={`font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
                       {chainName}
@@ -111,7 +83,7 @@ export default function ChainSelector({
                 
                 <div className="text-right">
                   <p className={`font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-                    {formatValue(chain.totalValue)}
+                    {formatCurrency(chain.totalValue)}
                   </p>
                   <p className="text-sm text-gray-500">
                     {formatPercentage(chain.percentageOfPortfolio)}

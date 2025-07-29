@@ -84,9 +84,7 @@ const initializeService = () => {
   const apiKey = process.env.NEXT_PUBLIC_ONEINCH_API_KEY;
   if (apiKey && apiKey !== 'your_hackathon_api_key_here') {
     oneInchService = new OneInchService({ apiKey });
-    // Set global service for cache management
-    const { setGlobalService } = require('@/services/oneinch');
-    setGlobalService(oneInchService);
+    // Service is now self-contained with no global state
   }
 };
 

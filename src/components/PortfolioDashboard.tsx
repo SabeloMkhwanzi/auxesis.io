@@ -2,60 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePortfolioStore } from '@/store/portfolio';
+import { formatCurrency, formatCountdown, getChainName, normalizeTokenData } from '@/utils/portfolioUtils';
+import { DEMO_WALLET_ADDRESS } from '@/utils/constants';
+import { PortfolioToken, Chain } from '@/types/token';
 import ChainSelector from './ChainSelector';
 import TokenList from './TokenList';
 import ChainSummary from './ChainSummary';
 
-interface Token {
-  address: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  balance: number;
-  price: number;
-  value: number;
-  logo: string;
-  protocol: string;
-  profitLoss: number;
-  profitLossPercent: number;
-  roi: number;
-  balanceFormatted: string;
-  lastUpdated: string;
-}
-
-interface ChainData {
-  chainId: number;
-  name: string;
-  totalValue: number;
-  tokens: Token[];
-}
-
-interface Chain {
-  chainId: number;
-  name: string;
-  totalValue: number;
-  tokenCount: number;
-  percentageOfPortfolio: number;
-  logo?: string;
-}
-
-const SUPPORTED_CHAINS = [
-  { id: 1, name: 'Ethereum', symbol: 'ETH' },
-  { id: 10, name: 'Optimism', symbol: 'OP' },
-  { id: 56, name: 'BNB Chain', symbol: 'BNB' },
-  { id: 100, name: 'Gnosis', symbol: 'xDAI' },
-  { id: 137, name: 'Polygon', symbol: 'MATIC' },
-  { id: 324, name: 'ZKsync Era', symbol: 'ETH' },
-  { id: 8453, name: 'Base', symbol: 'ETH' },
-  { id: 42161, name: 'Arbitrum', symbol: 'ETH' },
-  { id: 43114, name: 'Avalanche', symbol: 'AVAX' },
-  { id: 59144, name: 'Linea', symbol: 'ETH' },
-  { id: 1101, name: 'Polygon zkEVM', symbol: 'ETH' },
-  { id: 1329, name: 'Sei', symbol: 'SEI' },
-];
-
 export default function PortfolioDashboard() {
-  const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
+  const [countdown, setCountdown] = useState(600);
   const [selectedChainId, setSelectedChainId] = useState<number | null>(null);
   const [manualWalletInput, setManualWalletInput] = useState('');
   
@@ -74,15 +29,7 @@ export default function PortfolioDashboard() {
     clearError,
   } = usePortfolioStore();
   
-  // Demo wallet for testing - get from environment
-  const DEMO_WALLET = process.env.NEXT_PUBLIC_DEMO_WALLET_ADDRESS || '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-  
-  // Helper functions
-  const getChainName = (chainId: number) => {
-    const chain = SUPPORTED_CHAINS.find(c => c.id === chainId);
-    return chain ? chain.name : `Chain ${chainId}`;
-  };
-  
+  // Helper functions (using shared utilities)
   const prepareChainData = (): Chain[] => {
     return chains.map(chainData => ({
       chainId: chainData.chainId,
@@ -98,34 +45,11 @@ export default function PortfolioDashboard() {
     return chains.find(chain => chain.chainId === selectedChainId);
   };
   
-  const getSelectedChainTokens = (): Token[] => {
+  const getSelectedChainTokens = (): PortfolioToken[] => {
     const chainData = getSelectedChainData();
     if (!chainData) return [];
     
-    // Ensure all tokens have required properties with proper types
-    return chainData.tokens.map(token => ({
-      address: token.address,
-      symbol: token.symbol,
-      name: token.name,
-      decimals: token.decimals || 18,
-      balance: token.balance,
-      price: token.price,
-      value: token.value,
-      logo: token.logo || `data:image/svg+xml;base64,${btoa(`
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="16" cy="16" r="16" fill="#E5E7EB"/>
-          <text x="16" y="20" text-anchor="middle" fill="#6B7280" font-family="Arial" font-size="12" font-weight="bold">
-            ${token.symbol?.slice(0, 2) || '??'}
-          </text>
-        </svg>
-      `)}`,
-      protocol: token.protocol || 'ERC20',
-      profitLoss: token.profitLoss || 0,
-      profitLossPercent: token.profitLossPercent || 0,
-      roi: token.roi || 0,
-      balanceFormatted: token.balanceFormatted || token.balance.toString(),
-      lastUpdated: token.lastUpdated || new Date().toISOString()
-    }));
+    return chainData.tokens.map(token => normalizeTokenData(token));
   };
 
   // Auto-refresh portfolio data every 10 minutes
@@ -154,7 +78,7 @@ export default function PortfolioDashboard() {
   
   // Event handlers
   const handleConnectDemo = () => {
-    setWalletAddress(DEMO_WALLET);
+    setWalletAddress(DEMO_WALLET_ADDRESS);
   };
   
   const handleManualWalletSubmit = () => {
@@ -195,19 +119,6 @@ export default function PortfolioDashboard() {
     
     return () => clearInterval(countdownInterval);
   }, [walletAddress, countdown]);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  const formatCountdown = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   // Prepare data for components
   const chainData = prepareChainData();

@@ -1,25 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-
-interface Token {
-  address: string;
-  symbol: string;
-  name: string;
-  balance: number;
-  balanceFormatted: string;
-  price: number;
-  value: number;
-  logo: string;
-  profitLoss: number;
-  profitLossPercent: number;
-  roi: number;
-  protocol: string;
-  lastUpdated: string;
-}
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { PortfolioToken } from '@/types/token';
+import { 
+  formatCurrency, 
+  formatPrice, 
+  formatProfitLossPercentage, 
+  getPercentageColor,
+  handleTokenImageError 
+} from '@/utils/portfolioUtils';
 
 interface TokenListProps {
-  tokens: Token[];
+  tokens: PortfolioToken[];
   chainName: string;
   chainId: number;
   isLoading?: boolean;
@@ -27,46 +21,14 @@ interface TokenListProps {
 
 export default function TokenList({ tokens, chainName, chainId, isLoading }: TokenListProps) {
   const [showAllTokens, setShowAllTokens] = useState(false);
+  const router = useRouter();
 
   // Show top 5 tokens by default, or all if toggled
   const displayedTokens = showAllTokens ? tokens : tokens.slice(0, 5);
   const hasMoreTokens = tokens.length > 5;
 
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-    return `$${value.toFixed(2)}`;
-  };
-
-  const formatPrice = (price: number) => {
-    if (price >= 1000) return `$${price.toFixed(0)}`;
-    if (price >= 1) return `$${price.toFixed(2)}`;
-    if (price >= 0.01) return `$${price.toFixed(4)}`;
-    return `$${price.toFixed(8)}`;
-  };
-
-  const formatPercentage = (percent: number) => {
-    const sign = percent >= 0 ? '+' : '';
-    return `${sign}${percent.toFixed(2)}%`;
-  };
-
-  const getPercentageColor = (percent: number) => {
-    if (percent > 0) return 'text-green-600 bg-green-100';
-    if (percent < 0) return 'text-red-600 bg-red-100';
-    return 'text-gray-600 bg-gray-100';
-  };
-
-  const handleTokenImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    // Fallback to a generic token icon or initials
-    target.src = `data:image/svg+xml;base64,${btoa(`
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="16" fill="#E5E7EB"/>
-        <text x="16" y="20" text-anchor="middle" fill="#6B7280" font-family="Arial" font-size="12" font-weight="bold">
-          ${target.alt?.slice(0, 2) || '??'}
-        </text>
-      </svg>
-    `)}`;
+  const handleTokenClick = (token: PortfolioToken) => {
+    router.push(`/token/${chainId}/${token.address}`);
   };
 
   if (isLoading) {
@@ -143,7 +105,11 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {displayedTokens.map((token, index) => (
-                    <tr key={token.address} className="hover:bg-gray-50 transition-colors">
+                    <tr 
+                      key={token.address} 
+                      className="hover:bg-blue-50 transition-colors cursor-pointer"
+                      onClick={() => handleTokenClick(token)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-8 w-8">
@@ -151,7 +117,7 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                               className="h-8 w-8 rounded-full"
                               src={token.logo}
                               alt={token.symbol}
-                              onError={handleTokenImageError}
+                              onError={(e) => handleTokenImageError(e, token.symbol)}
                             />
                           </div>
                           <div className="ml-3">
@@ -179,7 +145,7 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatValue(token.value)}
+                          {formatCurrency(token.value)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -187,7 +153,7 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                           inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                           ${getPercentageColor(token.profitLossPercent)}
                         `}>
-                          {formatPercentage(token.profitLossPercent)}
+                          {formatProfitLossPercentage(token.profitLossPercent)}
                         </span>
                       </td>
                     </tr>
@@ -224,6 +190,8 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
           )}
         </>
       )}
+      
+
     </div>
   );
 }
