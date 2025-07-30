@@ -5,6 +5,8 @@ import { usePortfolioStore } from '@/store/portfolio';
 import { formatCurrency, formatCountdown, getChainName, normalizeTokenData } from '@/utils/portfolioUtils';
 import { DEMO_WALLET_ADDRESS } from '@/utils/constants';
 import { PortfolioToken, Chain } from '@/types/token';
+import { WalletConnection } from '@/components/wallet';
+import { useWallet } from '@/components/wallet/WalletProvider';
 import ChainSelector from './ChainSelector';
 import TokenList from './TokenList';
 import ChainSummary from './ChainSummary';
@@ -12,7 +14,9 @@ import ChainSummary from './ChainSummary';
 export default function PortfolioDashboard() {
   const [countdown, setCountdown] = useState(600);
   const [selectedChainId, setSelectedChainId] = useState<number | null>(null);
-  const [manualWalletInput, setManualWalletInput] = useState('');
+  
+  // Use wallet connection hook
+  const { activeAddress, isConnected, isManualMode } = useWallet();
   
   const {
     walletAddress,
@@ -52,6 +56,13 @@ export default function PortfolioDashboard() {
     return chainData.tokens.map(token => normalizeTokenData(token));
   };
 
+  // Sync activeAddress with portfolio store
+  useEffect(() => {
+    if (activeAddress && activeAddress !== walletAddress) {
+      setWalletAddress(activeAddress);
+    }
+  }, [activeAddress, walletAddress, setWalletAddress]);
+  
   // Auto-refresh portfolio data every 10 minutes
   useEffect(() => {
     if (!walletAddress) return;
@@ -79,13 +90,6 @@ export default function PortfolioDashboard() {
   // Event handlers
   const handleConnectDemo = () => {
     setWalletAddress(DEMO_WALLET_ADDRESS);
-  };
-  
-  const handleManualWalletSubmit = () => {
-    if (manualWalletInput.trim()) {
-      setWalletAddress(manualWalletInput.trim());
-      setManualWalletInput('');
-    }
   };
   
   const handleFetchPortfolio = async () => {
@@ -141,65 +145,42 @@ export default function PortfolioDashboard() {
 
         {/* Connection Status */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Wallet Connection</h2>
+          <h2 className="text-xl font-semibold mb-4">Portfolio Autopilot</h2>
           
-          {!walletAddress ? (
+          {!activeAddress ? (
             <div className="space-y-4">
-              <div className="text-center">
-                <p className="text-gray-600 mb-4">Connect a wallet to start tracking your portfolio</p>
-                <button
-                  onClick={handleConnectDemo}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Use Vitalik's Wallet (Demo)
-                </button>
-              </div>
+              <WalletConnection showInfo={false} />
               
               <div className="border-t pt-4">
-                <p className="text-sm text-gray-600 mb-2">Or enter any wallet address:</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={manualWalletInput}
-                    onChange={(e) => setManualWalletInput(e.target.value)}
-                    placeholder="0x..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleManualWalletSubmit();
-                      }
-                    }}
-                  />
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">Or try with a demo wallet:</p>
                   <button
-                    onClick={handleManualWalletSubmit}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                    onClick={handleConnectDemo}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Connect
+                    Use Vitalik's Wallet (Demo)
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Connected Wallet:</p>
-                <p className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                  {walletAddress}
-                </p>
+            <div className="space-y-4">
+              <WalletConnection showInfo={true} />
+              <div className="flex justify-center">
+                <button
+                  onClick={handleFetchPortfolio}
+                  disabled={isLoading}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? 'Loading...' : 'Refresh Portfolio'}
+                </button>
               </div>
-              <button
-                onClick={handleFetchPortfolio}
-                disabled={isLoading}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? 'Loading...' : 'Refresh Portfolio'}
-              </button>
             </div>
           )}
         </div>
 
         {/* Portfolio Overview and Modular Components */}
-        {walletAddress && (
+        {activeAddress && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column: Chain Selector */}
             <div className="lg:col-span-1">
@@ -263,7 +244,7 @@ export default function PortfolioDashboard() {
                     className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
                   >
                     Check Rebalancing
-                    {walletAddress && countdown > 0 && (
+                    {activeAddress && countdown > 0 && (
                       <span className="ml-2 text-xs opacity-75">
                         Auto-refresh in: {formatCountdown(countdown)}
                       </span>
@@ -276,7 +257,7 @@ export default function PortfolioDashboard() {
         )}
         
         {/* Full Width: Token List for Selected Chain */}
-        {walletAddress && selectedChainId && (
+        {activeAddress && selectedChainId && (
           <div className="mt-6">
             <TokenList
               tokens={selectedChainTokens}
