@@ -79,9 +79,9 @@ export default function SupportedChains() {
     <div className="mt-4 md:mt-8 mb-4 md:mb-8">
       <div className="bg-black backdrop-blur-sm rounded-xl md:rounded-2xl mx-2 md:mx-8 py-3 md:py-4 relative marquee overflow-hidden">
         {/* Left fade mask */}
-        <div className="absolute left-0 top-0 bottom-0 w-[60px] md:w-[100px] bg-gradient-to-r from-black to-transparent z-10"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-[60px] md:w-[500px] bg-gradient-to-r from-black to-transparent z-10"></div>
         {/* Right fade mask */}
-        <div className="absolute right-0 top-0 bottom-0 w-[60px] md:w-[100px] bg-gradient-to-l from-black to-transparent z-10"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-[60px] md:w-[500px] bg-gradient-to-l from-black to-transparent z-10"></div>
         <div className={`marquee-content ${!imagesLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}>
           {/* First set of logos */}
           {supportedChains.map((chain, index) => (
