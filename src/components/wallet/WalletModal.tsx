@@ -2,9 +2,7 @@
 
 import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
 import { useWallet } from '@/components/wallet/WalletProvider';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -12,48 +10,63 @@ interface WalletModalProps {
 }
 
 export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
-  const router = useRouter();
   const { isConnected } = useWallet();
-  const [isLoading, setIsLoading] = useState(false);
   
-  // Redirect to dashboard when connected
+  // Close modal when wallet connects
   useEffect(() => {
-    if (isConnected && !isLoading) {
-      setIsLoading(true); // Set loading state
-      
-      // Keep modal open but show loading state
+    if (isConnected) {
       setTimeout(() => {
-        router.push('/dashboard'); // Redirect to dashboard after showing loading state
-      }, 1500); // Give enough time to see the loading state
+        onClose(); // Just close the modal, don't redirect
+      }, 1000); // Give a moment to see the connection success
     }
-  }, [isConnected, router, isLoading]);
+  }, [isConnected, onClose]);
   
   if (!isOpen) return null;
   
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-      <div className="bg-gray-900 rounded-xl p-6 max-w-md w-full relative">
-        {!isLoading && (
-          <button 
-            className="absolute top-4 right-4 text-white/60 hover:text-white"
-            onClick={onClose}
-          >
-            ✕
-          </button>
-        )}
+      <div className="bg-[#181818] rounded-xl p-8 max-w-md w-full relative border border-white/10">
+        <button 
+          className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+          onClick={onClose}
+        >
+          ✕
+        </button>
         
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-10 w-10 text-yellow-400 animate-spin mb-4" />
-            <h2 className="text-xl font-bold text-white mb-2">Wallet Connected!</h2>
-            <p className="text-gray-400 text-center">Redirecting to your portfolio dashboard...</p>
+        {/* Brand Header */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <img 
+              src="/Auxesis-logo-persona.svg" 
+              alt="Auxesis.io" 
+              className="w-30 h-30"
+            />
           </div>
-        ) : (
-          <>
-            <h2 className="text-xl font-bold text-white mb-6">Connect Your Wallet</h2>
-            <WalletConnectButton />
-          </>
-        )}
+          <p className="text-base text-white/80 font-medium">
+            Cross-Chain Portfolio Autopilot
+          </p>
+        </div>
+        
+        {/* UX Message */}
+        <div className="bg-[#243029]/30 rounded-lg p-4 mb-6 border border-[#559779]/20">
+          <h3 className="text-white font-medium mb-2">Connect Your Wallet</h3>
+          <p className="text-sm text-white/80 leading-relaxed">
+            Connect your wallet to start managing your cross-chain DeFi portfolio. 
+            Track assets across multiple networks and optimize your allocations with 1inch infrastructure.
+          </p>
+        </div>
+        
+        {/* Wallet Connect Button */}
+        <div className="flex justify-center">
+          <WalletConnectButton />
+        </div>
+        
+        {/* Security Note */}
+        <div className="mt-4 text-center">
+          <p className="text-xs text-white/50">
+            🔒 Your wallet stays secure. We never store your private keys.
+          </p>
+        </div>
       </div>
     </div>
   );

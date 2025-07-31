@@ -149,11 +149,15 @@ export const WalletConnectButton: React.FC<WalletConnectButtonProps> = ({
         }}
         connectModal={{
           title: "Connect Your Wallet",
-          titleIcon: "/logo.png",
           size: "wide",
           welcomeScreen: {
             title: "Welcome to Auxesis Portfolio Autopilot",
             subtitle: "Connect your wallet to start managing your cross-chain DeFi portfolio",
+            img: {
+              src: "/Auxesis-logo-persona.svg",
+              width: 200,
+              height: 200,
+            },
           },
         }}
         detailsButton={{

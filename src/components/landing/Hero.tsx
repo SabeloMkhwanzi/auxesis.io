@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useWallet } from '@/components/wallet/WalletProvider';
+import { useEffect, useState } from 'react';
 
 interface HeroProps {
   openWalletModal?: () => void;
@@ -9,10 +11,27 @@ interface HeroProps {
 
 export default function Hero({ openWalletModal }: HeroProps) {
   const router = useRouter();
+  const { isConnected } = useWallet();
+  const [shouldRedirectAfterConnection, setShouldRedirectAfterConnection] = useState(false);
   
   const handleGetStarted = () => {
     router.push('/dashboard');
   };
+  
+  const handleConnectWallet = () => {
+    setShouldRedirectAfterConnection(true);
+    if (openWalletModal) {
+      openWalletModal();
+    }
+  };
+  
+  // Redirect to dashboard when wallet connects from landing page
+  useEffect(() => {
+    if (isConnected && shouldRedirectAfterConnection) {
+      router.push('/dashboard');
+      setShouldRedirectAfterConnection(false);
+    }
+  }, [isConnected, shouldRedirectAfterConnection, router]);
 
   return (
     <div className="w-auto mt-4 md:mt-7 mb-4 md:mb-7 mx-4 md:mx-[30px] bg-[#181818] rounded-xl md:rounded-[2rem] overflow-hidden relative">
@@ -56,7 +75,7 @@ export default function Hero({ openWalletModal }: HeroProps) {
         </div>
         
         {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[50vh] md:min-h-[60vh] text-center px-4 md:px-8 pb-12 md:pb-20 pt-5">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-[50vh] md:min-h-[60vh] text-center px-4 md:px-8 pb-12 md:pb-20 pt-2">
           <div className="max-w-4xl mx-auto">
             {/* Badge */}
             <div className="mb-8">
@@ -90,7 +109,7 @@ export default function Hero({ openWalletModal }: HeroProps) {
               
               <Button 
                 className="bg-[#243029] hover:text-[#559779] text-[#FFFFFF] font-medium text-sm sm:text-base px-5 sm:px-6 md:px-8 py-2 md:py-3 rounded-[1rem] border border-white/10 hover:border-[#559779] w-full sm:w-auto"
-                onClick={openWalletModal}
+                onClick={handleConnectWallet}
               >
                 Connect Wallet
               </Button>
