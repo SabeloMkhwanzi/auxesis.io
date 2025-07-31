@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
 
 interface NavBarProps {
   openWalletModal: () => void;
@@ -36,12 +37,7 @@ export default function NavBar({ openWalletModal }: NavBarProps) {
       
       {/* Right Side Button */}
       <div className="flex items-center mr-3">
-        <Button 
-          className="bg-[#243029] hover:text-[#559779] text-[#FFFFFF] font-medium text-xs md:text-sm px-3 md:px-6 py-1.5 md:py-2 rounded-[1rem] border border-white/10 hover:border-[#559779]"
-          onClick={openWalletModal}
-        >
-          Connect Wallet
-        </Button>
+        <WalletConnectButton />
       </div>
     </nav>
   );
