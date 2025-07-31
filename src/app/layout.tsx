@@ -15,7 +15,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cross-Chain Portfolio Autopilot",
+  title: "Auxesis | Cross-Chain Portfolio Autopilot",
   description: "Intelligent DeFi portfolio management across multiple chains using 1inch infrastructure",
 };
 
