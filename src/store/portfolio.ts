@@ -51,16 +51,14 @@ interface PortfolioState {
   chains: ChainPortfolio[];
   isLoading: boolean;
   error: string | null;
-  lastUpdated: Date | null;
-
-  // Target allocations
-  targetAllocations: Record<string, number>;
-  driftThreshold: number;
-
-  // Rebalancing
+  lastUpdated: number | null; // Timestamp when data was last fetched
   rebalancingSuggestions: RebalancingSuggestion[];
   needsRebalancing: boolean;
   maxDrift: number;
+
+  // Target allocations and drift settings
+  targetAllocations: Record<string, number>;
+  driftThreshold: number;
 
   // Chain display settings
   showAllChains: boolean;
@@ -68,6 +66,7 @@ interface PortfolioState {
 
   // Actions
   setWalletAddress: (address: string) => void;
+  clearPortfolio: () => void;
   fetchPortfolio: () => Promise<void>;
   setTargetAllocations: (allocations: Record<string, number>) => void;
   setDriftThreshold: (threshold: number) => void;
@@ -75,6 +74,11 @@ interface PortfolioState {
   clearError: () => void;
   toggleShowAllChains: () => void;
   toggleSortChainsByValue: () => void;
+  
+  // Data freshness utilities
+  getDataAge: () => number | null; // Returns age in minutes
+  isDataStale: (thresholdMinutes?: number) => boolean;
+  refreshIfStale: (thresholdMinutes?: number) => Promise<void>;
 }
 
 // Initialize 1inch service (will be updated when API key is available)
@@ -119,6 +123,20 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     set({ walletAddress: address });
   },
 
+  clearPortfolio: () => {
+    set({
+      walletAddress: null,
+      totalValue: 0,
+      chains: [],
+      isLoading: false,
+      error: null,
+      lastUpdated: null,
+      rebalancingSuggestions: [],
+      needsRebalancing: false,
+      maxDrift: 0,
+    });
+  },
+
   fetchPortfolio: async () => {
     const { walletAddress } = get();
     if (!walletAddress) {
@@ -145,7 +163,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         totalValue: portfolio.totalValue,
         chains: portfolio.chains,
         isLoading: false,
-        lastUpdated: new Date(),
+        lastUpdated: Date.now(), // Use timestamp instead of Date object
       });
     } catch (error: any) {
       set({
@@ -204,6 +222,26 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
 
   toggleSortChainsByValue: () => {
     set((state) => ({ sortChainsByValue: !state.sortChainsByValue }));
+  },
+
+  // Data freshness utilities
+  getDataAge: () => {
+    const { lastUpdated } = get();
+    if (!lastUpdated) return null;
+    return Math.floor((Date.now() - lastUpdated) / (1000 * 60)); // Age in minutes
+  },
+
+  isDataStale: (thresholdMinutes = 5) => {
+    const { getDataAge } = get();
+    const age = getDataAge();
+    return age === null || age >= thresholdMinutes;
+  },
+
+  refreshIfStale: async (thresholdMinutes = 5) => {
+    const { isDataStale, fetchPortfolio } = get();
+    if (isDataStale(thresholdMinutes)) {
+      await fetchPortfolio();
+    }
   },
 }));
 

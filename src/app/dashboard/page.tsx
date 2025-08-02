@@ -5,7 +5,7 @@ import NavBar from '@/components/landing/NavBar';
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[#1F1F1F] text-white">
       {/* Navigation Bar */}
       <NavBar />
       

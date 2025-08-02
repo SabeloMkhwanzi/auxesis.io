@@ -1,29 +1,56 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CHAIN_LOGOS, CHAIN_NAMES } from '@/utils/constants';
-import { formatCurrency, formatPercentage } from '@/utils/portfolioUtils';
+import { CHAIN_NAMES, CHAIN_LOGOS } from '@/utils/constants';
+import { formatCurrency } from '@/utils/portfolioUtils';
+import { ChevronDownIcon, ChevronUpIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline';
 
 interface Chain {
   chainId: number;
-  name: string;
   totalValue: number;
   tokenCount: number;
-  percentageOfPortfolio: number;
-  logo?: string;
+  tokens: any[];
 }
 
 interface ChainSelectorProps {
   chains: Chain[];
-  selectedChainId: number | null;
+  selectedChainId: number;
   onChainSelect: (chainId: number) => void;
   totalPortfolioValue: number;
 }
+
+// Mini chart component for visual appeal
+const MiniChart = ({ isPositive, percentage }: { isPositive: boolean; percentage: string }) => {
+  const points = isPositive 
+    ? "M2,12 Q6,8 10,6 T18,4 L18,14 L2,14 Z" 
+    : "M2,4 Q6,8 10,10 T18,12 L18,14 L2,14 Z";
+  
+  return (
+    <div className="w-16 h-8 flex items-center">
+      <svg width="64" height="32" viewBox="0 0 20 16" className="overflow-visible">
+        <defs>
+          <linearGradient id={`gradient-${isPositive ? 'up' : 'down'}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity="0.1" />
+          </linearGradient>
+        </defs>
+        <path
+          d={points}
+          fill={`url(#gradient-${isPositive ? 'up' : 'down'})`}
+          stroke={isPositive ? '#10b981' : '#ef4444'}
+          strokeWidth="1.5"
+          className="drop-shadow-sm"
+        />
+      </svg>
+    </div>
+  );
+};
 
 export default function ChainSelector({ 
   chains, 
   selectedChainId, 
   onChainSelect, 
+  totalPortfolioValue
 }: ChainSelectorProps) {
   const [showAllChains, setShowAllChains] = useState(false);
 
@@ -35,71 +62,111 @@ export default function ChainSelector({
   const hasMoreChains = sortedChains.length > 3;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Chain Breakdown</h3>
-        <span className="text-sm text-gray-500">
-          {chains.length} of 12 supported chains
-        </span>
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h4 className="text-lg font-semibold text-white">My Top Chains</h4>
+          <span className="text-sm text-white/50">
+            {chains.length} chains
+          </span>
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-white/40">Sort</span>
+          <div className="text-sm text-white/60">by Value ↓</div>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {displayedChains.map((chain) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {displayedChains.map((chain, index) => {
           const isSelected = selectedChainId === chain.chainId;
           const chainName = CHAIN_NAMES[chain.chainId] || `Chain ${chain.chainId}`;
           const chainLogo = CHAIN_LOGOS[chain.chainId] || '⚪';
-          
+          const percentageChange = index === 0 ? '+4.82%' : index === 1 ? '+2.74%' : index === 2 ? '+1.23%' : '-0.45%';
+          const isPositive = !percentageChange.startsWith('-');
+          const rewardRate = index === 0 ? '34.82%' : index === 1 ? '27.45%' : index === 2 ? '10.23%' : '8.91%';
+          const rewardValue = index === 0 ? '+$2,436' : index === 1 ? '+$1,649' : index === 2 ? '+$1,267' : '+$892';
+
           return (
             <div
               key={chain.chainId}
               onClick={() => onChainSelect(chain.chainId)}
               className={`
-                p-4 rounded-lg border cursor-pointer transition-all duration-200
+                relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 group h-full
+                bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] backdrop-blur-sm
                 ${isSelected 
-                  ? 'border-blue-500 bg-blue-50 shadow-md' 
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'border-[#559779]/60 shadow-xl shadow-[#559779]/20 scale-[1.02]' 
+                  : 'border-white/10 hover:border-[#559779]/40 hover:shadow-lg hover:shadow-white/5 hover:scale-[1.01]'
                 }
               `}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <img 
-                    src={chainLogo} 
-                    alt={`${chainName} logo`}
-                    className="w-6 h-6 rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNGM0Y0RjYiLz4KPHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI2IiB5PSI2Ij4KPHBhdGggZD0iTTYgOUM3LjY1Njg1IDkgOSA3LjY1Njg1IDkgNkM5IDQuMzQzMTUgNy42NTY4NSAzIDYgM0M0LjM0MzE1IDMgMyA0LjM0MzE1IDMgNkMzIDcuNjU2ODUgNC4zNDMxNSA5IDYgOVoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+Cjwvc3ZnPgo=';
-                    }}
-                  />
-                  <div>
-                    <h4 className={`font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-                      {chainName}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {chain.tokenCount} token{chain.tokenCount !== 1 ? 's' : ''}
-                    </p>
+              {/* Selection indicator */}
+              {isSelected && (
+                <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#559779] rounded-full shadow-lg shadow-[#559779]/50"></div>
+              )}
+              
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+                      {chainLogo && chainLogo.startsWith('http') ? (
+                        <img 
+                          src={chainLogo} 
+                          alt={`${chainName} logo`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'block';
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <span 
+                        className="text-lg font-bold text-white" 
+                        style={{ display: chainLogo && chainLogo.startsWith('http') ? 'none' : 'block' }}
+                      >
+                        {chainName.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{chainName}</div>
+                      <div className="text-xs text-white/50">Proof of Stake</div>
+                    </div>
+                  </div>
+                  <div className={`flex items-center space-x-1 text-xs font-semibold ${
+                    isPositive ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {isPositive ? (
+                      <ArrowTrendingUpIcon className="w-3 h-3" />
+                    ) : (
+                      <ArrowTrendingDownIcon className="w-3 h-3" />
+                    )}
+                    <span>{percentageChange}</span>
                   </div>
                 </div>
                 
-                <div className="text-right">
-                  <p className={`font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-                    {formatCurrency(chain.totalValue)}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {formatPercentage(chain.percentageOfPortfolio)}
-                  </p>
+                {/* Reward rate section */}
+                <div className="mb-3">
+                  <div className="text-xs text-white/50 mb-1">Reward rate</div>
+                  <div className="text-2xl font-bold text-white">{rewardRate}</div>
                 </div>
-              </div>
-              
-              {/* Progress bar showing percentage of portfolio */}
-              <div className="mt-3">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      isSelected ? 'bg-blue-500' : 'bg-gray-400'
-                    }`}
-                    style={{ width: `${Math.min(chain.percentageOfPortfolio, 100)}%` }}
-                  />
+                
+                {/* Mini chart */}
+                <div className="mb-3">
+                  <MiniChart isPositive={isPositive} percentage={percentageChange} />
+                </div>
+                
+                {/* Portfolio value and percentage */}
+                <div className="flex items-center justify-between">
+                  <div className={`text-sm font-semibold ${
+                    isPositive ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {rewardValue}
+                  </div>
+                  <div className="text-sm text-white/70">
+                    {((chain.totalValue / totalPortfolioValue) * 100).toFixed(1)}%
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,21 +179,17 @@ export default function ChainSelector({
         <div className="mt-4 text-center">
           <button
             onClick={() => setShowAllChains(!showAllChains)}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-200 border border-blue-200 hover:border-blue-300"
+            className="px-4 py-2 text-sm font-medium text-[#559779] hover:text-[#559779]/80 hover:bg-[#559779]/10 rounded-lg transition-colors duration-200 border border-[#559779]/30 hover:border-[#559779]/50"
           >
             {showAllChains ? (
               <>
                 <span>Show Less</span>
-                <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
+                <ChevronUpIcon className="w-4 h-4 ml-1 inline-block" />
               </>
             ) : (
               <>
                 <span>Show {sortedChains.length - 3} More Chains</span>
-                <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDownIcon className="w-4 h-4 ml-1 inline-block" />
               </>
             )}
           </button>
@@ -134,7 +197,7 @@ export default function ChainSelector({
       )}
 
       {chains.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-white/50">
           <p>No chains with assets found</p>
           <p className="text-sm mt-1">Connect a wallet to view your portfolio</p>
         </div>

@@ -124,7 +124,7 @@ export const TOKEN_DETAIL_TABS = [
 ];
 
 // Demo wallet address fallback
-export const DEMO_WALLET_ADDRESS = process.env.NEXT_PUBLIC_DEMO_WALLET_ADDRESS || '0x638342B06AE45f3DeEF2d847be1F66e91ed4e685';
+export const DEMO_WALLET_ADDRESS = (process.env.NEXT_PUBLIC_DEMO_WALLET_ADDRESS || '0xc18360217d8f7ab5e7c516566761ea12ce7f9d72') as string;
 
 // API endpoints and configuration
 export const API_CONFIG = {

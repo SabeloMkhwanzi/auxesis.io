@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usePortfolioStore } from '@/store/portfolio';
 import { getChainName } from '@/utils/portfolioUtils';
+import { DEMO_WALLET_ADDRESS } from '@/utils/constants';
 
 interface ChainPortfolio {
   chainId: number;
@@ -51,7 +52,7 @@ export const usePortfolioDashboard = (): UsePortfolioDashboardReturn => {
     clearError,
   } = usePortfolioStore();
   
-  const DEMO_WALLET = process.env.NEXT_PUBLIC_DEMO_WALLET_ADDRESS || '0x638342B06AE45f3DeEF2d847be1F66e91ed4e685';
+  const DEMO_WALLET = process.env.NEXT_PUBLIC_DEMO_WALLET_ADDRESS;
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -130,7 +131,7 @@ export const usePortfolioDashboard = (): UsePortfolioDashboardReturn => {
   };
 
   const handleConnectDemo = () => {
-    setWalletAddress(DEMO_WALLET);
+    setWalletAddress(DEMO_WALLET_ADDRESS);
   };
 
   const handleManualWalletSubmit = () => {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@1inch/fusion-sdk": "^2.3.5",
     "@1inch/limit-order-sdk": "4.9.5-rc.0",
+    "@heroicons/react": "^2.2.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@types/recharts": "^2.0.1",
     "@types/ws": "^8.18.1",
