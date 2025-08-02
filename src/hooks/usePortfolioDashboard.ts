@@ -60,7 +60,7 @@ export const usePortfolioDashboard = (): UsePortfolioDashboardReturn => {
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
-          console.log('🔄 Auto-refreshing portfolio data...');
+
           fetchPortfolio();
           return 600;
         }

@@ -32,9 +32,9 @@ interface ProcessedToken {
   value: number;
   logo: string;
   protocol: string;
-  profitLoss: number;
-  profitLossPercent: number;
-  roi: number;
+  profitLoss: number | null;
+  profitLossPercent: number | null;
+  roi: number | null;
   balanceFormatted: string;
   lastUpdated: string;
 }
@@ -91,9 +91,10 @@ class PortfolioProcessingService {
             value: tokenDetail.value_usd || 0,
             logo: logoUrl,
             protocol: 'ERC20',
-            profitLoss: tokenDetail.abs_profit_usd || 0,
-            profitLossPercent: tokenDetail.roi ? (tokenDetail.roi * 100) : 0,
-            roi: tokenDetail.roi || 0,
+            profitLoss: tokenDetail.abs_profit_usd ?? null, // Convert undefined to null
+            profitLossPercent: tokenDetail.roi ? (tokenDetail.roi * 100) : null,
+            roi: tokenDetail.roi ?? null, // Convert undefined to null
+
             balanceFormatted: portfolioUtilsService.formatTokenBalance(
               tokenDetail.amount || 0,
               tokenMetadata?.decimals || 18

@@ -29,11 +29,7 @@ export class TokenService {
     tokenAddress: string
   ): Promise<TransactionAnalytics | null> {
     try {
-      console.log('🚀 Starting transaction analytics fetch for:', {
-        chainId,
-        tokenAddress,
-        walletAddress
-      });
+
 
       if (!walletAddress) {
         console.warn('❌ No wallet address provided');
@@ -49,14 +45,14 @@ export class TokenService {
         this.oneInchService = new OneInchService({ apiKey });
       }
 
-      console.log('📡 Calling getTransactionAnalytics...');
+
       const analytics = await this.oneInchService.getTransactionAnalytics(
         chainId,
         walletAddress,
         tokenAddress
       );
 
-      console.log('✅ Transaction analytics received:', analytics);
+
       return analytics;
     } catch (error) {
       console.error('Error fetching transaction analytics:', error);
@@ -74,7 +70,7 @@ export class TokenService {
     interval: string = '7d'
   ): Promise<ChartDataPoint[]> {
     try {
-      console.log('📈 Generating mock chart data for demo:', { chainId, tokenAddress, interval });
+
 
       // Generate mock chart data for demo purposes
       const now = Date.now();
@@ -96,7 +92,7 @@ export class TokenService {
         });
       }
 
-      console.log(`✅ Mock chart data generated: ${mockData.length} points`);
+
       return mockData;
     } catch (error) {
       console.error('Error generating chart data:', error);
@@ -113,11 +109,11 @@ export class TokenService {
     tokenAddress: string
   ): Promise<TokenDetails | null> {
     try {
-      console.log('🔍 Token details not available from 1inch API:', { chainId, tokenAddress });
+
       
       // 1inch doesn't provide a token details API endpoint
       // Token information is already available from the portfolio data
-      console.log('ℹ️ Using token data from portfolio instead of separate API call');
+
       return null;
     } catch (error) {
       console.error('Error in token details:', error);
@@ -141,9 +137,9 @@ export class TokenService {
         throw new Error('OneInch service not initialized');
       }
 
-      console.log('🏷️ Fetching token metadata:', { chainId, tokenAddress });
+
       const metadata = await this.oneInchService.getTokenDetailsAndMetadata(chainId, tokenAddress);
-      console.log('✅ Token metadata received:', metadata);
+
       return metadata;
     } catch (error) {
       console.error('Error fetching token metadata:', error);
@@ -167,12 +163,12 @@ export class TokenService {
         throw new Error('OneInch service not initialized');
       }
 
-      console.log('💰 Fetching token price:', { chainId, tokenAddress });
+
       const prices = await this.oneInchService.getTokenPrices(chainId, [tokenAddress]);
       
       if (prices && prices[tokenAddress]) {
         const price = parseFloat(prices[tokenAddress]);
-        console.log('✅ Token price received:', price);
+
         return price;
       }
 
@@ -197,7 +193,7 @@ export class TokenService {
     transactionAnalytics: TransactionAnalytics | null;
     price: number | null;
   }> {
-    console.log('🔄 Fetching comprehensive token data...');
+
 
     // Execute all API calls in parallel for better performance
     const [chartData, tokenDetails, transactionAnalytics, price] = await Promise.allSettled([

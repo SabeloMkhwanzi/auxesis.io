@@ -55,9 +55,9 @@ export const formatProfitLossPercentage = (percent: number): string => {
  * Get CSS color class for percentage values (P&L styling)
  */
 export const getPercentageColor = (percent: number): string => {
-  if (percent > 0) return 'text-green-600';
-  if (percent < 0) return 'text-red-600';
-  return 'text-gray-600';
+  if (percent > 0) return 'text-green-400';
+  if (percent < 0) return 'text-red-400';
+  return 'text-white/50';
 };
 
 /**

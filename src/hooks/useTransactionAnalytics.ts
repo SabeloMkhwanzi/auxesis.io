@@ -29,16 +29,9 @@ export const useTransactionAnalytics = (
   // Fetch transaction analytics
   const fetchTransactionAnalytics = async () => {
     if (!token || !walletAddress) {
-      console.log('🔍 No token or wallet address found, skipping transaction analytics');
+
       return;
     }
-    
-    console.log('🚀 Starting transaction analytics fetch for:', {
-      chainId,
-      tokenAddress,
-      tokenName: token.name,
-      walletAddress
-    });
     
     setIsLoadingTransactions(true);
     try {
@@ -48,7 +41,7 @@ export const useTransactionAnalytics = (
         tokenAddress
       );
       
-      console.log('✅ Transaction analytics received:', analytics);
+
       setTransactionAnalytics(analytics);
       setRecentTransactions(analytics?.recentTransactions || []); 
     } catch (error) {

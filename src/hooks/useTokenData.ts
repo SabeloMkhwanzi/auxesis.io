@@ -28,11 +28,11 @@ export const useTokenData = (chainId: number, tokenAddress: string): UseTokenDat
     : 0;
 
   useEffect(() => {
-    console.log('🔍 Looking for token:', { chainId, tokenAddress });
+
     
     const chainData = chains.find((chain: any) => chain.chainId === chainId);
     if (!chainData) {
-      console.log('❌ Chain not found:', chainId);
+
       return;
     }
 
@@ -41,10 +41,10 @@ export const useTokenData = (chainId: number, tokenAddress: string): UseTokenDat
     );
 
     if (foundToken) {
-      console.log('✅ Token found:', foundToken);
+
       setToken(foundToken); 
     } else {
-      console.log('❌ Token not found in chain data');
+
     }
   }, [chains, chainId, tokenAddress]);
 

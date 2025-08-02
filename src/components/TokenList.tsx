@@ -28,6 +28,8 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
   const displayedTokens = showAllTokens ? tokens : tokens.slice(0, 5);
   const hasMoreTokens = tokens.length > 5;
 
+
+
   const handleTokenClick = (token: PortfolioToken) => {
     router.push(`/token/${chainId}/${token.address}`);
   };
@@ -99,6 +101,12 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                       Value
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
+                      PnL
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
+                      ROI
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       24h Change
                     </th>
                   </tr>
@@ -161,12 +169,71 @@ export default function TokenList({ tokens, chainName, chainId, isLoading }: Tok
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className={`
-                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-105
-                          ${getPercentageColor(token.profitLossPercent)}
-                        `}>
-                          {formatProfitLossPercentage(token.profitLossPercent)}
-                        </span>
+                        {(() => {
+                          // Handle null PnL values from 1inch API
+                          const profitUsd = token.profitLoss;
+                          
+                          // If PnL data is null/undefined, show "N/A"
+                          if (profitUsd === null || profitUsd === undefined) {
+                            return (
+                              <div className="text-sm font-medium text-white/50 transition-colors duration-200">
+                                N/A
+                              </div>
+                            );
+                          }
+                          
+                          const isPositive = profitUsd >= 0;
+                          const profitFormatted = `${isPositive ? '+' : ''}${formatCurrency(Math.abs(profitUsd))}`;
+                          
+                          return (
+                            <div className={`text-sm font-medium transition-colors duration-200 ${
+                              isPositive ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {profitFormatted}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {(() => {
+                          // Handle null ROI values from 1inch API
+                          const roiValue = token.roi;
+                          
+                          // If ROI data is null/undefined, show "N/A"
+                          if (roiValue === null || roiValue === undefined) {
+                            return (
+                              <div className="text-sm font-medium text-white/50 transition-colors duration-200">
+                                N/A
+                              </div>
+                            );
+                          }
+                          
+                          const roiPercent = roiValue * 100; // Convert decimal to percentage
+                          const isPositive = roiPercent >= 0;
+                          const roiFormatted = `${isPositive ? '+' : ''}${roiPercent.toFixed(2)}%`;
+                          
+                          return (
+                            <div className={`text-sm font-medium transition-colors duration-200 ${
+                              isPositive ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {roiFormatted}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {token.profitLossPercent === null || token.profitLossPercent === undefined ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white/50">
+                            N/A
+                          </span>
+                        ) : (
+                          <span className={`
+                            inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-105
+                            ${getPercentageColor(token.profitLossPercent)}
+                          `}>
+                            {formatProfitLossPercentage(token.profitLossPercent)}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}

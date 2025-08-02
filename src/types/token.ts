@@ -39,9 +39,9 @@ export interface PortfolioToken {
   value: number;
   logo: string;
   protocol: string;
-  profitLoss: number;
-  profitLossPercent: number;
-  roi: number;
+  profitLoss: number | null;
+  profitLossPercent: number | null;
+  roi: number | null;
   balanceFormatted: string;
   lastUpdated: string;
 }

@@ -277,6 +277,7 @@ export default function PortfolioDashboard() {
                 selectedChainId={selectedChainId || 1}
                 onChainSelect={handleChainSelect}
                 totalPortfolioValue={totalValue}
+                walletAddress={activeAddress || DEMO_WALLET_ADDRESS}
               />
             </div>
             
@@ -285,8 +286,8 @@ export default function PortfolioDashboard() {
               {/* Left Column: Selected Chain Details */}
               <div className="flex">
                 {selectedChainData && (
-                  <div className="bg-[#181818] rounded-xl p-6 border border-white/10 w-full">
-                    <h3 className="text-lg font-semibold text-white mb-4">Selected Chain Details</h3>
+                  <div className="bg-[#181818] rounded-xl p-4 border border-white/10 w-full">
+                    <h3 className="text-base font-semibold text-white mb-3">Selected Chain Details</h3>
                     <ChainSummary
                       chainId={selectedChainId!}
                       chainName={selectedChainName}
@@ -295,6 +296,7 @@ export default function PortfolioDashboard() {
                       percentageOfPortfolio={totalValue > 0 ? (selectedChainData.totalValue / totalValue) * 100 : 0}
                       totalPortfolioValue={totalValue}
                       isLoading={isLoading}
+                      walletAddress={activeAddress || DEMO_WALLET_ADDRESS}
                     />
                   </div>
                 )}
@@ -302,24 +304,24 @@ export default function PortfolioDashboard() {
               
               {/* Right Column: Portfolio Overview */}
               <div className="flex">
-                <div className="bg-[#181818] rounded-xl p-6 border border-white/10 w-full">
-                  <h3 className="text-lg font-semibold text-white mb-4">Portfolio Overview</h3>
-                  <div className="space-y-4">
+                <div className="bg-[#181818] rounded-xl p-4 border border-white/10 w-full">
+                  <h3 className="text-base font-semibold text-white mb-3">Portfolio Overview</h3>
+                  <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-white/70">Total Portfolio Value</p>
-                      <p className="text-2xl font-bold text-white">{formatCurrency(totalValue)}</p>
+                      <p className="text-xs text-white/70">Total Portfolio Value</p>
+                      <p className="text-xl font-bold text-white">{formatCurrency(totalValue)}</p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-white/70">Active Chains</p>
-                      <p className="text-xl font-semibold text-[#559779]">
+                      <p className="text-xs text-white/70">Active Chains</p>
+                      <p className="text-lg font-semibold text-[#559779]">
                         {chains.filter(chain => chain.totalValue > 0).length}
                       </p>
                       <p className="text-xs text-white/50">out of {chains.length} supported</p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-white/70">Rebalancing Status</p>
+                      <p className="text-xs text-white/70">Rebalancing Status</p>
                       <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         needsRebalancing ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'
                       }`}>

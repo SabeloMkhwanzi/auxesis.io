@@ -139,10 +139,22 @@ class OneInchService {
     );
   }
 
+  async getTokenMetrics(chainId: number, walletAddress: string, timerange: string = '1year', useCache: boolean = true) {
+    const params = {
+      addresses: walletAddress,
+      chain_id: chainId.toString(),
+      timerange,
+      use_cache: useCache.toString()
+    };
+    
+    return apiRequestService.makeRequest('portfolio/portfolio/v5.0/tokens/metrics', params);
+  }
+
   async getTransactionAnalytics(chainId: number, walletAddress: string, tokenAddress?: string) {
     try {
       const params: any = { chainId, limit: 50 };
-      if (tokenAddress && tokenAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+      // Include tokenAddress filter if specified (for any token including ETH)
+      if (tokenAddress) {
         params.tokenAddress = tokenAddress;
       }
 
