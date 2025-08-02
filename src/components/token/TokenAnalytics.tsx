@@ -13,18 +13,18 @@ export const TokenAnalytics: React.FC<TokenAnalyticsProps> = ({
 }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-        <h3 className="text-2xl font-semibold text-gray-900 mb-6">Token Analytics</h3>
+      <div className="bg-[#181818] rounded-xl border border-white/10 p-8 mb-8">
+        <h3 className="text-2xl font-semibold text-white mb-6">Token Analytics</h3>
         
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#559779]"></div>
           </div>
         ) : analytics ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Transaction Type Breakdown */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Transaction Types</h4>
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h4 className="text-lg font-semibold text-white mb-4">Transaction Types</h4>
               {analytics.activityBreakdown && Object.keys(analytics.activityBreakdown).length > 0 ? (
                 <div className="space-y-3">
                   {Object.entries(analytics.activityBreakdown)
@@ -46,10 +46,10 @@ export const TokenAnalytics: React.FC<TokenAnalyticsProps> = ({
                     
                     return (
                       <div key={type} className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 capitalize">{type}</span>
+                        <span className="text-sm font-medium text-white/90 capitalize">{type}</span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-500">{count} ({percentage}%)</span>
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <span className="text-sm text-white/60">{count} ({percentage}%)</span>
+                          <div className="w-16 bg-white/10 rounded-full h-2">
                             <div 
                               className={`${getTypeColor(type)} h-2 rounded-full transition-all duration-300`}
                               style={{ width: `${percentage}%` }}
@@ -62,48 +62,48 @@ export const TokenAnalytics: React.FC<TokenAnalyticsProps> = ({
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-gray-500">No transaction activity found</p>
-                  <p className="text-xs text-gray-400 mt-1">Transaction types will appear here when data is available</p>
+                  <BarChart3 className="w-12 h-12 mx-auto mb-3 text-white/30" />
+                  <p className="text-white/60">No transaction activity found</p>
+                  <p className="text-xs text-white/40 mt-1">Transaction types will appear here when data is available</p>
                 </div>
               )}
             </div>
 
             {/* Volume Analytics */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Volume Analytics</h4>
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h4 className="text-lg font-semibold text-white mb-4">Volume Analytics</h4>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">Total Volume</span>
+                    <DollarSign className="w-4 h-4 text-white/60" />
+                    <span className="text-sm font-medium text-white/90">Total Volume</span>
                   </div>
-                  <span className="text-sm text-gray-900 font-semibold">
+                  <span className="text-sm text-white font-semibold">
                     {analytics.totalVolume ? analytics.totalVolume.toFixed(4) : '0.0000'} ETH
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <TrendingUp className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium text-gray-700">Recent Transactions</span>
+                    <TrendingUp className="w-4 h-4 text-[#559779]" />
+                    <span className="text-sm font-medium text-white/90">Recent Transactions</span>
                   </div>
-                  <span className="text-sm text-gray-900 font-semibold">
+                  <span className="text-sm text-white font-semibold">
                     {analytics.recentTransactions ? analytics.recentTransactions.length : 0}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Activity className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium text-gray-700">Timeline Data Points</span>
+                    <Activity className="w-4 h-4 text-green-400" />
+                    <span className="text-sm font-medium text-white/90">Timeline Data Points</span>
                   </div>
-                  <span className="text-sm text-gray-900 font-semibold">
+                  <span className="text-sm text-white font-semibold">
                     {analytics.timelineData ? analytics.timelineData.length : 0}
                   </span>
                 </div>
-                <div className="pt-2 border-t border-gray-200">
+                <div className="pt-2 border-t border-white/20">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Total Transactions</span>
-                    <span className="text-lg font-bold text-gray-900">
+                    <span className="text-sm font-medium text-white/90">Total Transactions</span>
+                    <span className="text-lg font-bold text-white">
                       {analytics.totalTransactions || 0}
                     </span>
                   </div>
@@ -112,11 +112,11 @@ export const TokenAnalytics: React.FC<TokenAnalyticsProps> = ({
             </div>
           </div>
         ) : (
-          <div className="h-64 flex items-center justify-center text-gray-500">
+          <div className="h-64 flex items-center justify-center text-white/60">
             <div className="text-center">
-              <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg">No analytics data available</p>
-              <p className="text-sm">Analytics will appear here when transaction data is loaded</p>
+              <BarChart3 className="w-16 h-16 mx-auto mb-4 text-white/30" />
+              <p className="text-lg text-white/80">No analytics data available</p>
+              <p className="text-sm text-white/60">Analytics will appear here when transaction data is loaded</p>
             </div>
           </div>
         )}

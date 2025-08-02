@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
 import { NavigationLoader } from '@/components/ui/NavigationLoader';
+import { Menu, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface NavBarProps {
@@ -12,6 +13,7 @@ export default function NavBar({ openWalletModal }: NavBarProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleHomeClick = () => {
     setIsLoading(true);
@@ -64,11 +66,62 @@ export default function NavBar({ openWalletModal }: NavBarProps) {
           <Button variant="ghost" className="text-white hover:bg-white/10 text-sm px-4 py-2 rounded-full" onClick={handleDocsClick}>Docs</Button>
         </div>
         
-        {/* Right Side Button */}
-        <div className="flex items-center mr-3">
+        {/* Right Side - Desktop */}
+        <div className="hidden md:flex items-center mr-3">
           <WalletConnectButton />
         </div>
+        
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center mr-3">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-white hover:text-[#559779] transition-colors p-2"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </nav>
+      
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-[#181818] border-t border-white/10 mx-3 rounded-b-lg">
+          <div className="px-4 py-3 space-y-2">
+            <Button 
+              variant="ghost" 
+              className="w-full text-left text-white hover:bg-white/10 justify-start" 
+              onClick={() => {
+                handleHomeClick();
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Home
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full text-left text-white hover:bg-white/10 justify-start" 
+              onClick={() => {
+                handleDashboardClick();
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full text-left text-white hover:bg-white/10 justify-start" 
+              onClick={() => {
+                handleDocsClick();
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Docs
+            </Button>
+            <div className="pt-2 border-t border-white/10">
+              <WalletConnectButton />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTokenData, useTransactionAnalytics } from '@/hooks';
 import { CHAIN_NAMES } from '@/utils/constants';
-import type { TokenDetailTab } from '@/types/token';
+import NavBar from '@/components/landing/NavBar';
 import {
   TokenHeader,
   TokenStats,
-  TokenTabs,
   TokenChart,
   TokenTransactions,
   TokenAnalytics,
@@ -45,22 +44,22 @@ export default function TokenDetailPage() {
     walletAddress,
   } = useTransactionAnalytics(chainId, tokenAddress, token);
 
- 
-  const [activeTab, setActiveTab] = useState<TokenDetailTab>('chart');
-
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#1F1F1F] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading token details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#559779] mx-auto mb-4"></div>
+          <p className="text-white/70">Loading token details...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1F1F1F] text-white">
+      {/* Navigation Bar */}
+      <NavBar />
+      
       {/* Token Header */}
       <TokenHeader
         token={token}
@@ -69,29 +68,23 @@ export default function TokenDetailPage() {
         onBack={() => router.back()}
       />
 
-      {/* Token Stats */}
-      <TokenStats
-        token={token}
-        tokenDetails={tokenDetails}
-      />
+      {/* Main Content Container */}
+      <div className="pb-16">
+        {/* Token Stats */}
+        <TokenStats
+          token={token}
+          tokenDetails={tokenDetails}
+        />
 
-      {/* Token Tabs */}
-      <TokenTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-
-      {/* Tab Content */}
-      {activeTab === 'chart' && (
+        {/* Token Chart Section */}
         <TokenChart
           chartData={chartData}
           isLoading={isLoadingChart}
           selectedInterval={selectedInterval}
           onIntervalChange={setSelectedInterval}
         />
-      )}
 
-      {activeTab === 'transactions' && (
+        {/* Transaction History Section */}
         <TokenTransactions
           transactions={recentTransactions}
           isLoading={isLoadingTransactions}
@@ -99,19 +92,18 @@ export default function TokenDetailPage() {
           token={token}
           chainId={chainId}
         />
-      )}
 
-      {activeTab === 'analytics' && (
+        {/* Token Analytics Section */}
         <TokenAnalytics
           analytics={transactionAnalytics}
           isLoading={isLoadingTransactions}
         />
-      )}
 
-      {/* Token Info */}
-      <TokenInfo
-        tokenDetails={tokenDetails}
-      />
+        {/* Token Info */}
+        <TokenInfo
+          tokenDetails={tokenDetails}
+        />
+      </div>
     </div>
   );
 }

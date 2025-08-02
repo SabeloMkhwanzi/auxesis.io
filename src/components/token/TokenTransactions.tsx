@@ -27,10 +27,10 @@ export const TokenTransactions: React.FC<TokenTransactionsProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+      <div className="bg-[#181818] rounded-xl border border-white/10 p-8 mb-8">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-semibold text-gray-900">Transaction History</h3>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <h3 className="text-2xl font-semibold text-white">Transaction History</h3>
+          <div className="flex items-center space-x-2 text-sm text-white/60">
             <Clock className="w-4 h-4" />
             <span>Last {transactions.length} transactions</span>
           </div>
@@ -38,52 +38,54 @@ export const TokenTransactions: React.FC<TokenTransactionsProps> = ({
 
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#559779]"></div>
           </div>
         ) : transactions.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className={`overflow-x-auto rounded-lg ${
+            transactions.length > 10 ? 'max-h-96 overflow-y-auto' : ''
+          }`}>
+            <table className="min-w-full divide-y divide-white/10">
+              <thead className="bg-[#559779]/20 rounded-t-lg border-b border-[#559779]/30">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Direction</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Direction</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Transaction</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">Rating</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-transparent divide-y divide-white/10">
                 {transactions.map((tx: any, index: number) => {
                   const direction = getTransactionDirectionWithWallet(tx);
                   const amount = formatTransactionAmount(tx);
                   
                   return (
-                    <tr key={tx.id || index} className="hover:bg-gray-50">
+                    <tr key={tx.id || index} className="hover:bg-white/5 transition-colors">
                       {/* Direction column */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         {direction === 'In' && (
-                          <span className="text-green-500 font-bold text-lg">↓</span>
+                          <span className="text-green-400 font-bold text-lg">↓</span>
                         )}
                         {direction === 'Out' && (
-                          <span className="text-red-500 font-bold text-lg">↑</span>
+                          <span className="text-red-400 font-bold text-lg">↑</span>
                         )}
                         {direction === 'Self' && (
-                          <span className="text-blue-500 font-bold text-lg">⟲</span>
+                          <span className="text-blue-400 font-bold text-lg">⟲</span>
                         )}
                         {direction === 'On' && (
-                          <span className="text-purple-500 font-bold text-lg">⟳</span>
+                          <span className="text-purple-400 font-bold text-lg">⟳</span>
                         )}
                       </td>
                       
                       {/* Transaction hash column */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                         {tx.details?.txHash ? (
                           <a 
                             href={getExplorerUrl(chainId, tx.details.txHash)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                            className="text-[#559779] hover:text-green-300 flex items-center space-x-1 transition-colors"
                           >
                             <span>{tx.details.txHash.slice(0, 8)}...{tx.details.txHash.slice(-6)}</span>
                             <ExternalLink className="w-3 h-3" />
@@ -96,27 +98,27 @@ export const TokenTransactions: React.FC<TokenTransactionsProps> = ({
                       {/* Type column */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          tx.details?.type === 'Swap' ? 'bg-blue-100 text-blue-800' :
-                          tx.details?.type === 'Transfer' ? 'bg-green-100 text-green-800' :
-                          tx.details?.type === 'Approve' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                          tx.details?.type === 'Swap' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          tx.details?.type === 'Transfer' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                          tx.details?.type === 'Approve' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-white/10 text-white/70 border border-white/20'
                         }`}>
                           {tx.details?.type || 'Unknown'}
                         </span>
                       </td>
                       
                       {/* Date column */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                         {formatTransactionDate(tx.timeAt || tx.timeMs || tx.timestamp)}
                       </td>
                       
                       {/* Amount column */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                         <span className={
-                          direction === 'In' ? 'text-green-500' : 
-                          direction === 'Out' ? 'text-red-500' : 
-                          direction === 'Self' ? 'text-blue-500' : 
-                          'text-purple-500'
+                          direction === 'In' ? 'text-green-400' : 
+                          direction === 'Out' ? 'text-red-400' : 
+                          direction === 'Self' ? 'text-blue-400' : 
+                          'text-purple-400'
                         }>
                           {direction === 'In' && '+'}
                           {direction === 'Out' && '-'}
@@ -125,11 +127,11 @@ export const TokenTransactions: React.FC<TokenTransactionsProps> = ({
                       </td>
                       
                       {/* Rating column */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                         <span className={
-                          tx.rating === 'Reliable' ? 'text-green-600 font-medium' : 
-                          tx.rating === 'Scam' ? 'text-red-600 font-medium' : 
-                          'text-gray-600'
+                          tx.rating === 'Reliable' ? 'text-green-400 font-medium' : 
+                          tx.rating === 'Scam' ? 'text-red-400 font-medium' : 
+                          'text-white/60'
                         }>
                           {tx.rating || 'Unknown'}
                         </span>
@@ -141,11 +143,11 @@ export const TokenTransactions: React.FC<TokenTransactionsProps> = ({
             </table>
           </div>
         ) : (
-          <div className="h-64 flex items-center justify-center text-gray-500">
+          <div className="h-64 flex items-center justify-center text-white/60">
             <div className="text-center">
-              <Clock className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg">No transactions found</p>
-              <p className="text-sm">Transaction history will appear here when available</p>
+              <Clock className="w-16 h-16 mx-auto mb-4 text-white/30" />
+              <p className="text-lg text-white/80">No transactions found</p>
+              <p className="text-sm text-white/60">Transaction history will appear here when available</p>
             </div>
           </div>
         )}
