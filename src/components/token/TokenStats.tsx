@@ -1,17 +1,47 @@
 import React from 'react';
 import { formatValue, getPriceChangeColor } from '@/utils/tokenUtils';
 import { Info } from 'lucide-react';
-import type { Token, TokenDetails } from '@/types/token';
+import type { Token, TokenDetails, HistoryMetrics } from '@/types/token';
 
 interface TokenStatsProps {
   token: Token;
   tokenDetails?: TokenDetails | null;
+  historyMetrics?: HistoryMetrics | null;
 }
 
 export const TokenStats: React.FC<TokenStatsProps> = ({
   token,
-  tokenDetails
+  tokenDetails,
+  historyMetrics
 }) => {
+
+  // Format profit/loss value with proper sign and color
+  const formatProfitLoss = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'N/A';
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}$${value.toFixed(2)}`;
+  };
+
+  // Format ROI as percentage
+  const formatROI = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'N/A';
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${(value * 100).toFixed(2)}%`;
+  };
+
+  // Format impermanent loss
+  const formatImpermanentLoss = (impermanentLoss: any[] | null | undefined) => {
+    if (!impermanentLoss || impermanentLoss.length === 0) return 'N/A';
+    // Sum up the USD value of impermanent loss
+    const totalLoss = impermanentLoss.reduce((sum, loss) => sum + (loss.amount_usd || 0), 0);
+    return totalLoss === 0 ? 'N/A' : `$${totalLoss.toFixed(2)}`;
+  };
+
+  // Get color for profit/loss values
+  const getProfitLossColor = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'text-white/50';
+    return value >= 0 ? 'text-green-400' : 'text-red-400';
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,43 +50,8 @@ export const TokenStats: React.FC<TokenStatsProps> = ({
         <div className="p-6">
           <div className="space-y-2">
               
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                {/* Your Balance */}
-                <div className="bg-[#1F1F1F] rounded-lg p-4 border border-white/5">
-                  <p className="text-sm text-white/60 mb-2">Your Balance</p>
-                  <p className="text-xl font-bold text-white">{token.balance}</p>
-                  <p className="text-xs text-white/50">{token.symbol}</p>
-                </div>
-
-                {/* Total Value */}
-                <div className="bg-[#1F1F1F] rounded-lg p-4 border border-white/5">
-                  <p className="text-sm text-white/60 mb-2">Total Value</p>
-                  <p className="text-xl font-bold text-white">{formatValue(token.value)}</p>
-                </div>
-
-                {/* 24h P&L */}
-                <div className="bg-[#1F1F1F] rounded-lg p-4 border border-white/5">
-                  <p className="text-sm text-white/60 mb-2">24h P&L</p>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-sm font-medium ${
-                    (token.priceChange24h || 0) >= 0 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {(token.priceChange24h || 0) > 0 ? '+' : ''}{(token.priceChange24h || 0).toFixed(2)}%
-                  </span>
-                </div>
-
-                {/* Market Cap */}
-                <div className="bg-[#1F1F1F] rounded-lg p-4 border border-white/5">
-                  <p className="text-sm text-white/60 mb-2">Market Cap</p>
-                  <p className="text-xl font-bold text-white">
-                    {tokenDetails?.market_cap ? formatValue(tokenDetails.market_cap) : 'N/A'}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Total Borrow Section */}
+              {/* Total Borrow Section - Commented out for now */}
+              {/*
               <div className="bg-[#1F1F1F] rounded-lg p-6 border border-white/5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-white">Total Borrow ({token.symbol})</h3>
@@ -89,6 +84,7 @@ export const TokenStats: React.FC<TokenStatsProps> = ({
                   <p className="text-sm text-white/50">{token.balance} {token.symbol}</p>
                 </div>
               </div>
+              */}
           </div>
         </div>
       </div>

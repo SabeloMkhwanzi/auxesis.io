@@ -1,39 +1,12 @@
 import { create } from 'zustand';
 import OneInchService from '@/services/oneinch';
+import type { MultiChainPortfolio, ChainPortfolio as ServiceChainPortfolio, ProcessedToken } from '@/services/portfolioProcessingService';
 
-interface Token {
-  address: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  balance: number;
-  price: number;
-  value: number;
-  
-  // Enhanced metadata from Portfolio API
-  logo?: string;
-  protocol?: string;
-  
-  // Price and performance data
-  priceChange24h?: number;
-  priceChangePercent24h?: number;
-  
-  // Portfolio performance
-  profitLoss?: number;
-  profitLossPercent?: number;
-  roi?: number;
-  
-  // Additional metadata
-  balanceFormatted?: string;
-  lastUpdated?: string;
-}
+// Use the ProcessedToken from the service as our Token type
+type Token = ProcessedToken;
 
-interface ChainPortfolio {
-  chainId: number;
-  chainName: string;
-  totalValue: number;
-  tokens: Token[];
-}
+// Use the ChainPortfolio from the service
+type ChainPortfolio = ServiceChainPortfolio;
 
 interface RebalancingSuggestion {
   token: string;

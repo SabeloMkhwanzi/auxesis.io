@@ -20,7 +20,7 @@ export const useTokenData = (chainId: number, tokenAddress: string): UseTokenDat
   const [token, setToken] = useState<Token | null>(null);
   const [tokenDetails, setTokenDetails] = useState<TokenDetails | null>(null);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [selectedInterval, setSelectedInterval] = useState<ChartInterval>(CHART_INTERVALS[2].value); // Default to 1D
+  const [selectedInterval, setSelectedInterval] = useState<ChartInterval>(CHART_INTERVALS[4].value); // Default to 30D
   const [isLoadingChart, setIsLoadingChart] = useState(false);
 
   const percentage = chartData.length > 1 

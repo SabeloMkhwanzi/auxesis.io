@@ -2,12 +2,13 @@ import React from 'react';
 import { ArrowLeft, Info } from 'lucide-react';
 import { formatPrice, getPriceChangeColor } from '@/utils/tokenUtils';
 import { CHAIN_NAMES, CHAIN_LOGOS } from '@/utils/constants';
-import type { Token } from '@/types/token';
+import type { Token, HistoryMetrics } from '@/types/token';
 
 interface TokenHeaderProps {
   token: Token;
   chainId: number;
   priceChangePercentage?: number;
+  historyMetrics?: HistoryMetrics | null;
   onBack: () => void;
 }
 
@@ -15,8 +16,29 @@ export const TokenHeader: React.FC<TokenHeaderProps> = ({
   token,
   chainId,
   priceChangePercentage,
+  historyMetrics,
   onBack
 }) => {
+
+  // Format profit/loss value with proper sign and color
+  const formatProfitLoss = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'N/A';
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}$${value.toFixed(2)}`;
+  };
+
+  // Format ROI as percentage
+  const formatROI = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'N/A';
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${(value * 100).toFixed(2)}%`;
+  };
+
+  // Get color for profit/loss values
+  const getProfitLossColor = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return 'text-white/50';
+    return value >= 0 ? 'text-green-400' : 'text-red-400';
+  };
   const chainName = CHAIN_NAMES[chainId] || `Chain ${chainId}`;
   
   const getChainLogo = (chainId: number): string => {
@@ -63,8 +85,8 @@ export const TokenHeader: React.FC<TokenHeaderProps> = ({
       </div>
 
       {/* Morpho-Inspired Token Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-[#181818] rounded-xl border border-white/10 p-8 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-[#181818] rounded-xl border border-white/10 p-4 mb-4">
           {/* Token Pair Display */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
@@ -124,53 +146,46 @@ export const TokenHeader: React.FC<TokenHeaderProps> = ({
             </div>
           </div>
 
-          {/* Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            {/* Total Market Size */}
-            <div className="bg-[#1F1F1F] rounded-lg p-6 border border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white/60 text-sm font-medium">Total Market Size</span>
-                <Info className="w-4 h-4 text-white/40" />
+          {/* Portfolio Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+            {/* Your Balance */}
+            <div className="bg-[#1F1F1F] rounded-md p-3 border border-white/5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-white/60 text-xs font-medium">Your Balance</span>
+                <Info className="w-3 h-3 text-white/40" />
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-white">
-                  ${(mockMetrics.totalMarketSize / 1000000).toFixed(2)}M
-                </p>
-                <p className="text-sm text-white/50">
-                  {(mockMetrics.totalMarketSize / 1000000).toFixed(2)}M {token.symbol}
-                </p>
+              <div className="space-y-0.5">
+                <p className="text-lg font-bold text-white">{Number(token.balance).toFixed(6)}</p>
+                <p className="text-xs text-white/50">{token.symbol}</p>
+                <p className="text-xs text-white/60">${(token.balance * token.price).toFixed(2)} USD</p>
               </div>
             </div>
 
-            {/* Total Liquidity */}
-            <div className="bg-[#1F1F1F] rounded-lg p-6 border border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white/60 text-sm font-medium">Total Liquidity</span>
-                <Info className="w-4 h-4 text-white/40" />
+            {/* Profit/Loss (from 1inch Portfolio API) */}
+            <div className="bg-[#1F1F1F] rounded-md p-3 border border-white/5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-white/60 text-xs font-medium">Profit/Loss</span>
+                <Info className="w-3 h-3 text-white/40" />
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-white">
-                  ${(mockMetrics.totalLiquidity / 1000000).toFixed(2)}M
+              <div className="space-y-0.5">
+                <p className={`text-lg font-bold ${getProfitLossColor(historyMetrics?.profit_abs_usd)}`}>
+                  {formatProfitLoss(historyMetrics?.profit_abs_usd)}
                 </p>
-                <p className="text-sm text-white/50">
-                  {(mockMetrics.totalLiquidity / 1000000).toFixed(2)}M {token.symbol}
-                </p>
+                <p className="text-xs text-white/50">Total P&L USD</p>
               </div>
             </div>
 
-            {/* Borrow Rate */}
-            <div className="bg-[#1F1F1F] rounded-lg p-6 border border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white/60 text-sm font-medium">APY Rate</span>
-                <Info className="w-4 h-4 text-white/40" />
+            {/* ROI (from 1inch Portfolio API) */}
+            <div className="bg-[#1F1F1F] rounded-md p-3 border border-white/5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-white/60 text-xs font-medium">ROI</span>
+                <Info className="w-3 h-3 text-white/40" />
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-white">
-                  {mockMetrics.borrowRate.toFixed(2)}%
+              <div className="space-y-0.5">
+                <p className={`text-lg font-bold ${getProfitLossColor(historyMetrics?.roi)}`}>
+                  {formatROI(historyMetrics?.roi)}
                 </p>
-                <p className="text-sm text-white/50">
-                  {(mockMetrics.borrowRate * 1000000).toFixed(0)} {token.symbol}
-                </p>
+                <p className="text-xs text-white/50">Return on Investment</p>
               </div>
             </div>
           </div>

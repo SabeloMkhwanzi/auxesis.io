@@ -116,6 +116,29 @@ export interface TransactionAnalytics {
   recentTransactions: any[];
 }
 
+// 1inch Portfolio API History Metrics interfaces
+export interface TokenBalance {
+  token_address: string;
+  amount: string;
+  amount_usd: number;
+}
+
+export interface HistoryMetrics {
+  index: string;
+  profit_abs_usd: number | null;
+  roi: number | null;
+  weighted_apr: number | null;
+  holding_time_days: number | null;
+  rewards_tokens: TokenBalance[] | null;
+  rewards_usd: number | null;
+  claimed_fees: TokenBalance[] | null;
+  unclaimed_fees: TokenBalance[] | null;
+  impermanent_loss: TokenBalance[] | null;
+  claimed_fees_usd: number | null;
+  unclaimed_fees_usd: number | null;
+  impermanent_loss_usd: number | null;
+}
+
 // Chain data interface (removed duplicate - using the one defined above with PortfolioToken[])
 
 // Portfolio store interface

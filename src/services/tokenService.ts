@@ -1,4 +1,4 @@
-import OneInchService from './oneinch';
+import OneInchService, { clearCache, getCacheStats } from './oneinch';
 import type { ChartDataPoint, TokenDetails, TransactionAnalytics, ApiResponse } from '@/types/token';
 import { API_CONFIG } from '@/utils/constants';
 
@@ -138,7 +138,7 @@ export class TokenService {
       }
 
 
-      const metadata = await this.oneInchService.getTokenDetailsAndMetadata(chainId, tokenAddress);
+      const metadata = await this.oneInchService.getTokensInfo(chainId, [tokenAddress]);
 
       return metadata;
     } catch (error) {
@@ -215,19 +215,14 @@ export class TokenService {
    * Clear service cache
    */
   clearCache(): void {
-    if (this.oneInchService) {
-      this.oneInchService.clearCache();
-    }
+    clearCache();
   }
 
   /**
    * Get cache statistics
    */
   getCacheStats(): { totalEntries: number; validEntries: number; expiredEntries: number } {
-    if (this.oneInchService) {
-      return this.oneInchService.getCacheStats();
-    }
-    return { totalEntries: 0, validEntries: 0, expiredEntries: 0 };
+    return getCacheStats();
   }
 }
 

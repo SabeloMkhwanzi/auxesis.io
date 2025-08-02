@@ -6,7 +6,7 @@ export const formatPrice = (price: number): string => {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 6
+    maximumFractionDigits: 2
   }).format(price);
 };
 

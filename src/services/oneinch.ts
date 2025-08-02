@@ -176,6 +176,71 @@ class OneInchService {
       };
     }
   }
+
+  async getHistoryMetrics(chainId: number, walletAddress: string, tokenAddress: string) {
+    try {
+      const params = {
+        chainId: chainId.toString(),
+        tokenAddress
+      };
+
+      const response = await fetch(`/api/history/${walletAddress}/metrics?${new URLSearchParams(params)}`);
+      if (!response.ok) {
+        throw new Error(`History Metrics API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Return the first metrics entry if available
+      if (data.result && data.result.length > 0) {
+        return data.result[0];
+      }
+      
+      // Return null if no data available
+      return null;
+    } catch (error) {
+      console.error('Error fetching history metrics:', error);
+      return null;
+    }
+  }
+
+  async getPortfolioChart(chainId: number, walletAddress: string, timerange: string = '1day') {
+    try {
+      const params = {
+        addresses: [walletAddress],
+        chain_id: chainId.toString(),
+        timerange,
+        use_cache: 'true'
+      };
+
+      const response = await fetch(`/api/portfolio/v5.0/general/chart?${new URLSearchParams({
+        addresses: walletAddress,
+        chain_id: chainId.toString(),
+        timerange,
+        use_cache: 'true'
+      })}`);
+      
+      if (!response.ok) {
+        throw new Error(`Portfolio Chart API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Transform the data for chart consumption
+      if (data.result && Array.isArray(data.result)) {
+        return data.result.map((point: any) => ({
+          timestamp: point.timestamp * 1000, // Convert to milliseconds
+          value: point.value_usd,
+          date: new Date(point.timestamp * 1000).toISOString()
+        }));
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching portfolio chart:', error);
+      return [];
+    }
+  }
 }
 
 export default OneInchService;

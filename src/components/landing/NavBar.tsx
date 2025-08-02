@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
 import { NavigationLoader } from '@/components/ui/NavigationLoader';
 import { Menu, X } from 'lucide-react';
@@ -11,6 +11,7 @@ interface NavBarProps {
 
 export default function NavBar({ openWalletModal }: NavBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,32 +19,33 @@ export default function NavBar({ openWalletModal }: NavBarProps) {
   const handleHomeClick = () => {
     setIsLoading(true);
     setLoadingMessage('Loading Home');
-    setTimeout(() => {
-      router.push('/');
-      // Loading will be cleared when page loads
-    }, 100);
+    router.push('/');
   };
   
   const handleDashboardClick = () => {
     setIsLoading(true);
     setLoadingMessage('Loading Dashboard');
-    setTimeout(() => {
-      router.push('/dashboard');
-      // Loading will be cleared when page loads
-    }, 100);
+    router.push('/dashboard');
   };
   
   const handleDocsClick = () => {
     window.open('https://github.com/SabeloMkhwanzi/auxesis.io', '_blank');
   };
   
-  // Clear loading state when component unmounts or after navigation
+  // Clear loading state when pathname changes (navigation completes)
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000); // Clear loading after 2 seconds max
-    
-    return () => clearTimeout(timer);
+    setIsLoading(false);
+  }, [pathname]);
+  
+  // Fallback: Clear loading after 3 seconds max to prevent stuck state
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
   }, [isLoading]);
   
   return (

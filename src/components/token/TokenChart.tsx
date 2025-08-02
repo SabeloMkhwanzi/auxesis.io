@@ -8,13 +8,14 @@ import {
 } from '@/components/ui/chart';
 import { formatPrice } from '@/utils/tokenUtils';
 import { CHART_INTERVALS } from '@/utils/constants';
-import type { ChartDataPoint, ChartInterval } from '@/types/token';
+import type { ChartDataPoint, ChartInterval, Token } from '@/types/token';
 
 interface TokenChartProps {
   chartData: ChartDataPoint[];
   selectedInterval: ChartInterval;
   onIntervalChange: (interval: ChartInterval) => void;
   isLoading: boolean;
+  token: Token | null;
 }
 
 const chartConfig = {
@@ -28,10 +29,14 @@ export const TokenChart: React.FC<TokenChartProps> = ({
   chartData,
   selectedInterval,
   onIntervalChange,
-  isLoading
+  isLoading,
+  token
 }) => {
   const formatDateForChart = (value: any) => {
+    if (!value || isNaN(value)) return 'No date';
     const date = new Date(value as number);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
@@ -40,18 +45,80 @@ export const TokenChart: React.FC<TokenChartProps> = ({
     });
   };
 
+  const formatTooltipDate = (value: any) => {
+    if (!value) return 'No date';
+    
+    let date: Date;
+    
+    // Handle different data types
+    if (value instanceof Date) {
+      // Already a Date object
+      date = value;
+    } else if (typeof value === 'number') {
+      // Timestamp number
+      date = new Date(value);
+    } else if (typeof value === 'string') {
+      // String timestamp or date string
+      const parsed = parseInt(value);
+      if (!isNaN(parsed)) {
+        date = new Date(parsed);
+      } else {
+        date = new Date(value);
+      }
+    } else {
+      return 'Invalid date format';
+    }
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
+
+  const formatTokenAmount = () => {
+    if (!token) return '0';
+    
+    // Use the actual token balance from the token data
+    const balance = Number(token.balance);
+    
+    // Format with appropriate decimal places (same as TokenHeader)
+    return balance.toFixed(6);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-[#181818] rounded-xl border border-white/10 p-8 mb-8">
+      <div className="bg-[#181818] rounded-xl border border-[#559779]/20 p-8 mb-8">
         {/* Chart Header - Similar to Total Borrow Style */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-2">Price Chart</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">Total Value</h3>
             <p className="text-2xl font-bold text-white">
-              {chartData.length > 0 ? formatPrice(chartData[chartData.length - 1]?.price || 0) : '$0.00'}
+              {token 
+                ? `${formatTokenAmount()} ${token.symbol}` 
+                : `0 TOKEN`
+              }
+            </p>
+            <p className="text-sm text-white/60">
+              {token 
+                ? formatPrice(token.balance * token.price) + ' USD'
+                : '$0.00 USD'
+              }
             </p>
             <p className="text-sm text-white/50">
-              {chartData.length > 0 ? new Date(chartData[chartData.length - 1]?.timestamp || Date.now()).toLocaleDateString() : ''}
+              {chartData.length > 0 && chartData[chartData.length - 1]?.timestamp 
+                ? new Date(chartData[chartData.length - 1].timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })
+                : 'No data available'
+              }
             </p>
           </div>
           
@@ -60,13 +127,7 @@ export const TokenChart: React.FC<TokenChartProps> = ({
             {/* Chart Type Tabs */}
             <div className="flex space-x-1">
               <button className="px-4 py-2 text-sm font-medium text-[#559779] bg-[#559779]/10 rounded-lg border border-[#559779]/20">
-                Price Chart
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white/80 hover:bg-white/5 rounded-lg">
-                Transaction History
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white/80 hover:bg-white/5 rounded-lg">
-                Analytics
+                Total Value
               </button>
             </div>
             
@@ -122,7 +183,12 @@ export const TokenChart: React.FC<TokenChartProps> = ({
                     />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} />
+                <CartesianGrid 
+                  vertical={false} 
+                  stroke="#559779" 
+                  strokeOpacity={0.2}
+                  strokeDasharray="3 3"
+                />
                 <XAxis
                   dataKey="timestamp"
                   tickLine={false}
@@ -133,13 +199,31 @@ export const TokenChart: React.FC<TokenChartProps> = ({
                 />
                 <ChartTooltip
                   cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      labelFormatter={(value: any) => formatDateForChart(value)}
-                      formatter={(value: any) => [formatPrice(value as number), 'Price']}
-                      indicator="dot"
-                    />
-                  }
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-[#1F1F1F] border border-[#559779]/30 text-white shadow-lg rounded-lg p-3">
+                          <p className="text-sm text-white/70 mb-2">
+                            {formatTooltipDate(data.timestamp)}
+                          </p>
+                          <p className="text-lg font-semibold text-white">
+                            {token 
+                              ? `${formatTokenAmount()} ${token.symbol}`
+                              : formatPrice(payload[0].value as number)
+                            }
+                          </p>
+                          <p className="text-sm text-white/60">
+                            {token 
+                              ? formatPrice(token.balance * token.price) + ' USD'
+                              : formatPrice(data.value) + ' USD'
+                            }
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
                 <Area
                   dataKey="price"

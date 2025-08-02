@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useTokenData, useTransactionAnalytics } from '@/hooks';
+import { useTokenData, useTransactionAnalytics, useHistoryMetrics, usePortfolioChart } from '@/hooks';
 import { CHAIN_NAMES } from '@/utils/constants';
 import NavBar from '@/components/landing/NavBar';
+import { NavigationLoader } from '@/components/ui/NavigationLoader';
 import {
   TokenHeader,
   TokenStats,
@@ -44,14 +45,42 @@ export default function TokenDetailPage() {
     walletAddress,
   } = useTransactionAnalytics(chainId, tokenAddress, token);
 
+  const {
+    historyMetrics,
+    isLoading: isLoadingHistoryMetrics,
+    error: historyMetricsError
+  } = useHistoryMetrics(chainId, tokenAddress);
+
+  // Get portfolio chart data (wallet value over time) - this is real data
+  const {
+    chartData: portfolioChartData,
+    isLoading: isLoadingPortfolioChart,
+    error: portfolioChartError
+  } = usePortfolioChart(chainId, walletAddress || '', selectedInterval);
+
+  // Use real portfolio data with proper structure for chart
+  const chartDataToUse = portfolioChartData.map(point => ({
+    ...point,
+    price: point.value, // Use value as price for portfolio data
+    date: new Date(point.timestamp)
+  }));
+  
+  // Log errors for debugging
+  if (portfolioChartError) {
+    console.warn('Portfolio chart API error:', portfolioChartError);
+  }
+
   if (!token) {
     return (
-      <div className="min-h-screen bg-[#1F1F1F] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#559779] mx-auto mb-4"></div>
-          <p className="text-white/70">Loading token details...</p>
+      <>
+        <div className="min-h-screen bg-[#1F1F1F] text-white">
+          <NavBar />
         </div>
-      </div>
+        <NavigationLoader 
+          isLoading={true} 
+          message="Loading token details..." 
+        />
+      </>
     );
   }
 
@@ -65,23 +94,28 @@ export default function TokenDetailPage() {
         token={token}
         chainId={chainId}
         priceChangePercentage={percentage}
+        historyMetrics={historyMetrics}
         onBack={() => router.back()}
       />
 
       {/* Main Content Container */}
       <div className="pb-16">
-        {/* Token Stats */}
+        {/* Token Stats - Commented out for now */}
+        {/*
         <TokenStats
           token={token}
           tokenDetails={tokenDetails}
+          historyMetrics={historyMetrics}
         />
+        */}
 
-        {/* Token Chart Section */}
+        {/* Token Chart Section - Portfolio Value Over Time (Real Data) */}
         <TokenChart
-          chartData={chartData}
-          isLoading={isLoadingChart}
+          chartData={chartDataToUse}
+          isLoading={isLoadingPortfolioChart}
           selectedInterval={selectedInterval}
           onIntervalChange={setSelectedInterval}
+          token={token}
         />
 
         {/* Transaction History Section */}
